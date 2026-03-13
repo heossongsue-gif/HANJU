@@ -41,7 +41,7 @@ export default function SignupPage() {
     setLoading(false);
 
     if (signUpError) {
-      setError('회원가입 중 오류가 발생했습니다. 이미 가입된 이메일인지 확인해주세요.');
+      setError(`회원가입 오류: ${signUpError.message}`);
       return;
     }
 

@@ -12,20 +12,21 @@ export default function NewCustomerPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [tour, setTour] = useState('');
+  const [memo, setMemo] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addCustomer({ name, email, phone, tour });
+    await addCustomer({ name, email, phone, tour, memo: memo.trim() || null });
     router.push('/customers');
   };
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-4">Add New Customer</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4">새 고객 등록</h1>
+      <form onSubmit={handleSubmit} className="bg-white p-4 md:p-6 rounded-lg shadow-md space-y-4">
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-            Name
+            이름
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
@@ -38,7 +39,7 @@ export default function NewCustomerPage() {
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-            Email
+            이메일
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
@@ -51,7 +52,7 @@ export default function NewCustomerPage() {
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="phone">
-            Phone
+            전화번호
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
@@ -62,9 +63,9 @@ export default function NewCustomerPage() {
             required
           />
         </div>
-        <div className="mb-6">
+        <div>
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="tour">
-            Assigned Tour
+            방문 경로나 간단 정보
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
@@ -72,22 +73,35 @@ export default function NewCustomerPage() {
             type="text"
             value={tour}
             onChange={(e) => setTour(e.target.value)}
-            required
+            placeholder="예: 6월 제주 3박4일, 1조 배정"
           />
         </div>
-        <div className="flex items-center justify-end gap-2">
+        <div>
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="memo">
+            가이드 메모 (가이드만 볼 수 있음)
+          </label>
+          <textarea
+            id="memo"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+            rows={3}
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+            placeholder="예: 알레르기, 특이사항, 요청 사항 등"
+          />
+        </div>
+        <div className="flex items-center justify-end gap-2 pt-2">
           <button
             type="button"
             onClick={() => router.back()}
             className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
           >
-            Cancel
+            취소
           </button>
           <button
             type="submit"
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
-            Save Customer
+            저장
           </button>
         </div>
       </form>

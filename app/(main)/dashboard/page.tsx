@@ -88,25 +88,21 @@ export default function DashboardPage() {
 
   const [newTitle, setNewTitle] = useState('');
   const [newMemo, setNewMemo] = useState('');
-  const [newImageUrl, setNewImageUrl] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
 
   const handleCreateEvent = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDateKey || !newTitle.trim()) return;
 
-    // newImageUrl에는 data URL(파일 선택) 또는 일반 URL이 들어갈 수 있음
     addEvent({
       date: selectedDateKey,
       title: newTitle.trim(),
       memo: newMemo.trim() || undefined,
-      imageUrl: newImageUrl.trim() || undefined,
       linkUrl: newLinkUrl.trim() || undefined,
     });
 
     setNewTitle('');
     setNewMemo('');
-    setNewImageUrl('');
     setNewLinkUrl('');
   };
 
@@ -114,8 +110,10 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-sky-700">가이드 일정 관리</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-sky-700">
+            가이드 일정 관리
+          </h1>
+          <p className="text-gray-500 text-xs md:text-sm mt-1">
             이 달의 투어 일정과 문의를 한 눈에 확인하세요.
           </p>
         </div>
@@ -155,7 +153,7 @@ export default function DashboardPage() {
               >
                 ‹
               </button>
-              <span className="text-lg font-semibold text-gray-800">
+              <span className="text-base md:text-lg font-semibold text-gray-800">
                 {monthLabel}
               </span>
               <button
@@ -206,23 +204,20 @@ export default function DashboardPage() {
                       onClick={() =>
                         setSelectedDate(new Date(year, month, day))
                       }
-                      className={`h-20 rounded-lg border text-xs flex flex-col items-start p-1.5 transition ${
+                      className={`h-20 rounded-lg border text-[11px] md:text-xs flex flex-col items-start p-1.5 transition ${
                         isSelected
                           ? 'border-sky-500 bg-sky-50'
                           : isToday
                           ? 'border-sky-300 bg-sky-50'
                           : 'border-sky-50 hover:border-sky-200 hover:bg-sky-50'
                       }`}
-                    >
+                      >
                       <span
-                        className={`text-sm font-semibold ${
+                        className={`text-sm md:text-base font-semibold ${
                           isToday || isSelected ? 'text-sky-600' : 'text-gray-700'
                         }`}
                       >
                         {day}
-                      </span>
-                      <span className="mt-1 text-[11px] text-gray-400">
-                        일정 추가 / 사진, 링크 메모
                       </span>
                     </button>
                   );
@@ -278,20 +273,8 @@ export default function DashboardPage() {
                         {ev.memo && (
                           <p className="text-xs text-gray-600">{ev.memo}</p>
                         )}
-                        {(ev.imageUrl || ev.linkUrl) && (
+                        {ev.linkUrl && (
                           <div className="flex flex-col gap-1 text-[11px]">
-                            {ev.imageUrl &&
-                              (ev.imageUrl.startsWith('data:image') ? (
-                                <img
-                                  src={ev.imageUrl}
-                                  alt="일정 사진"
-                                  className="h-16 w-auto rounded border border-sky-100 object-cover"
-                                />
-                              ) : (
-                                <span className="text-gray-500 break-all">
-                                  사진 URL: {ev.imageUrl}
-                                </span>
-                              ))}
                             {ev.linkUrl && (
                               <a
                                 href={ev.linkUrl}
@@ -328,38 +311,6 @@ export default function DashboardPage() {
                         className="w-full border border-sky-100 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
                         rows={2}
                       />
-                      <div className="space-y-1 text-xs text-gray-600">
-                        <label className="block font-semibold">
-                          사진 선택 (선택)
-                        </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) {
-                              setNewImageUrl('');
-                              return;
-                            }
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                              const result = reader.result;
-                              if (typeof result === 'string') {
-                                setNewImageUrl(result);
-                              }
-                            };
-                            reader.readAsDataURL(file);
-                          }}
-                          className="block w-full text-xs text-gray-600"
-                        />
-                        {newImageUrl && newImageUrl.startsWith('data:image') && (
-                          <img
-                            src={newImageUrl}
-                            alt="선택한 사진 미리보기"
-                            className="mt-1 h-20 w-auto rounded border border-sky-100 object-cover"
-                          />
-                        )}
-                      </div>
                       <input
                         type="url"
                         value={newLinkUrl}

@@ -40,7 +40,12 @@ export function ScheduleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    } catch (err) {
+      // 로컬 스토리지 용량 초과 등은 앱이 죽지 않도록 무시
+      console.error('일정 데이터를 저장하는 중 오류가 발생했습니다.', err);
+    }
   }, [events]);
 
   const getEventsByDate = (date: string) =>

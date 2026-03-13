@@ -9,6 +9,7 @@ interface Customer {
   email: string;
   phone: string;
   tour: string;
+  memo: string | null;
 }
 
 interface CustomersContextType {
@@ -44,6 +45,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
           email: row.email,
           phone: row.phone,
           tour: row.tour,
+          memo: row.memo ?? null,
         })) ?? [];
 
       setCustomers(mapped);
@@ -61,6 +63,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
         email: newCustomer.email,
         phone: newCustomer.phone,
         tour: newCustomer.tour,
+        memo: newCustomer.memo ?? null,
       })
       .select()
       .single();
@@ -76,6 +79,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
       email: data.email,
       phone: data.phone,
       tour: data.tour,
+      memo: data.memo ?? null,
     };
 
     setCustomers((prev) => [...prev, created]);
@@ -90,6 +94,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
         email: updated.email,
         phone: updated.phone,
         tour: updated.tour,
+        memo: updated.memo ?? null,
       })
       .eq('id', updated.id)
       .select()
@@ -106,6 +111,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
       email: data.email,
       phone: data.phone,
       tour: data.tour,
+      memo: data.memo ?? null,
     };
 
     setCustomers((prev) =>

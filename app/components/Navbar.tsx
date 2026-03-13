@@ -9,6 +9,7 @@ export default function Navbar() {
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [group, setGroup] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -18,6 +19,7 @@ export default function Navbar() {
       if (!user) {
         setDisplayName(null);
         setGroup(null);
+        setUserEmail(null);
         return;
       }
       const meta = user.user_metadata || {};
@@ -25,10 +27,20 @@ export default function Navbar() {
       const groupInMeta = (meta.group as string | undefined) || null;
       setDisplayName(nameInMeta || user.email || null);
       setGroup(groupInMeta || null);
+       setUserEmail(user.email ?? null);
     };
 
     void loadUser();
   }, []);
+
+  const rawGuideEmails = process.env.NEXT_PUBLIC_GUIDE_EMAIL || '';
+  const guideEmails = rawGuideEmails
+    .split(',')
+    .map((v) => v.trim().toLowerCase())
+    .filter(Boolean);
+  const isGuide =
+    guideEmails.length === 0 ||
+    (userEmail !== null && guideEmails.includes(userEmail.toLowerCase()));
 
   const handleLogout = async () => {
     const supabase = getSupabaseClient();
@@ -49,17 +61,19 @@ export default function Navbar() {
           >
             일정
           </Link>
+          {isGuide && (
+            <Link
+              href="/customers"
+              className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-sky-50 hover:text-sky-600"
+            >
+              고객 관리
+            </Link>
+          )}
           <Link
-            href="/tours"
+            href="/notices"
             className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-sky-50 hover:text-sky-600"
           >
-            투어 관리
-          </Link>
-          <Link
-            href="/customers"
-            className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-sky-50 hover:text-sky-600"
-          >
-            고객 관리
+            공지사항
           </Link>
         </div>
         <div className="flex items-center gap-3">
