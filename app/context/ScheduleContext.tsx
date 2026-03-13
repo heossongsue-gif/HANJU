@@ -1,66 +1,132 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { getSupabaseClient } from '../../lib/supabaseClient';
 
 export interface ScheduleEvent {
   id: string;
   date: string; // YYYY-MM-DD
   title: string;
-  memo?: string;
-  imageUrl?: string;
-  linkUrl?: string;
+  memo?: string | null;
+  linkUrl?: string | null;
 }
 
 interface ScheduleContextType {
   events: ScheduleEvent[];
   getEventsByDate: (date: string) => ScheduleEvent[];
-  addEvent: (event: Omit<ScheduleEvent, 'id'>) => void;
-  updateEvent: (event: ScheduleEvent) => void;
-  deleteEvent: (id: string) => void;
+  addEvent: (event: Omit<ScheduleEvent, 'id'>) => Promise<void>;
+  updateEvent: (event: ScheduleEvent) => Promise<void>;
+  deleteEvent: (id: string) => Promise<void>;
 }
 
 const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined);
-
-const STORAGE_KEY = 'hanju_schedule_events_v1';
 
 export function ScheduleProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as ScheduleEvent[];
-      setEvents(parsed);
-    } catch {
-      // ignore
-    }
-  }, []);
+    const loadEvents = async () => {
+      try {
+        const supabase = getSupabaseClient();
+        const { data, error } = await supabase
+          .from('schedule_events')
+          .select('*')
+          .order('date', { ascending: true });
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
-    } catch (err) {
-      // 로컬 스토리지 용량 초과 등은 앱이 죽지 않도록 무시
-      console.error('일정 데이터를 저장하는 중 오류가 발생했습니다.', err);
-    }
-  }, [events]);
+        if (error) {
+          console.error('Failed to load schedule events from Supabase', error);
+          return;
+        }
+
+        const mapped: ScheduleEvent[] =
+          data?.map((row: any) => ({
+            id: row.id,
+            date: row.date,
+            title: row.title,
+            memo: row.memo ?? null,
+            linkUrl: row.link_url ?? null,
+          })) ?? [];
+
+        setEvents(mapped);
+      } catch (err) {
+        console.error('Unexpected error while loading schedule events', err);
+      }
+    };
+
+    void loadEvents();
+  }, []);
 
   const getEventsByDate = (date: string) =>
     events.filter((e) => e.date === date);
 
-  const addEvent = (input: Omit<ScheduleEvent, 'id'>) => {
-    const id = crypto.randomUUID();
-    setEvents((prev) => [...prev, { id, ...input }]);
+  const addEvent = async (input: Omit<ScheduleEvent, 'id'>) => {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from('schedule_events')
+      .insert({
+        date: input.date,
+        title: input.title,
+        memo: input.memo ?? null,
+        link_url: input.linkUrl ?? null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to add schedule event', error);
+      return;
+    }
+
+    const created: ScheduleEvent = {
+      id: data.id,
+      date: data.date,
+      title: data.title,
+      memo: data.memo ?? null,
+      linkUrl: data.link_url ?? null,
+    };
+
+    setEvents((prev) => [...prev, created]);
   };
 
-  const updateEvent = (updated: ScheduleEvent) => {
-    setEvents((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+  const updateEvent = async (updated: ScheduleEvent) => {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from('schedule_events')
+      .update({
+        date: updated.date,
+        title: updated.title,
+        memo: updated.memo ?? null,
+        link_url: updated.linkUrl ?? null,
+      })
+      .eq('id', updated.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to update schedule event', error);
+      return;
+    }
+
+    const saved: ScheduleEvent = {
+      id: data.id,
+      date: data.date,
+      title: data.title,
+      memo: data.memo ?? null,
+      linkUrl: data.link_url ?? null,
+    };
+
+    setEvents((prev) => prev.map((e) => (e.id === saved.id ? saved : e)));
   };
 
-  const deleteEvent = (id: string) => {
+  const deleteEvent = async (id: string) => {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.from('schedule_events').delete().eq('id', id);
+
+    if (error) {
+      console.error('Failed to delete schedule event', error);
+      return;
+    }
+
     setEvents((prev) => prev.filter((e) => e.id !== id));
   };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { getSupabaseClient } from '../../lib/supabaseClient';
 
 export interface Notice {
   id: string;
@@ -12,46 +13,114 @@ export interface Notice {
 
 interface NoticesContextType {
   notices: Notice[];
-  addNotice: (input: Omit<Notice, 'id' | 'createdAt'>) => void;
-  updateNotice: (notice: Notice) => void;
-  deleteNotice: (id: string) => void;
+  addNotice: (input: Omit<Notice, 'id' | 'createdAt'>) => Promise<void>;
+  updateNotice: (notice: Notice) => Promise<void>;
+  deleteNotice: (id: string) => Promise<void>;
 }
 
 const NoticesContext = createContext<NoticesContextType | undefined>(undefined);
-
-const STORAGE_KEY = 'hanju_notices_v1';
 
 export function NoticesProvider({ children }: { children: ReactNode }) {
   const [notices, setNotices] = useState<Notice[]>([]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as Notice[];
-      setNotices(parsed);
-    } catch {
-      // ignore
-    }
+    const loadNotices = async () => {
+      try {
+        const supabase = getSupabaseClient();
+        const { data, error } = await supabase
+          .from('notices')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Failed to load notices from Supabase', error);
+          return;
+        }
+
+        const mapped: Notice[] =
+          data?.map((row: any) => ({
+            id: row.id,
+            title: row.title,
+            content: row.content ?? '',
+            folder: row.folder ?? '전체',
+            createdAt: row.created_at,
+          })) ?? [];
+
+        setNotices(mapped);
+      } catch (err) {
+        console.error('Unexpected error while loading notices', err);
+      }
+    };
+
+    void loadNotices();
   }, []);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(notices));
-  }, [notices]);
+  const addNotice = async (input: Omit<Notice, 'id' | 'createdAt'>) => {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from('notices')
+      .insert({
+        title: input.title,
+        content: input.content ?? '',
+        folder: input.folder ?? '전체',
+      })
+      .select()
+      .single();
 
-  const addNotice = (input: Omit<Notice, 'id' | 'createdAt'>) => {
-    const id = crypto.randomUUID();
-    const createdAt = new Date().toISOString();
-    setNotices((prev) => [...prev, { id, createdAt, ...input }]);
+    if (error) {
+      console.error('Failed to add notice', error);
+      return;
+    }
+
+    const created: Notice = {
+      id: data.id,
+      title: data.title,
+      content: data.content ?? '',
+      folder: data.folder ?? '전체',
+      createdAt: data.created_at,
+    };
+
+    setNotices((prev) => [created, ...prev]);
   };
 
-  const updateNotice = (updated: Notice) => {
-    setNotices((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+  const updateNotice = async (updated: Notice) => {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from('notices')
+      .update({
+        title: updated.title,
+        content: updated.content ?? '',
+        folder: updated.folder ?? '전체',
+      })
+      .eq('id', updated.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to update notice', error);
+      return;
+    }
+
+    const saved: Notice = {
+      id: data.id,
+      title: data.title,
+      content: data.content ?? '',
+      folder: data.folder ?? '전체',
+      createdAt: data.created_at,
+    };
+
+    setNotices((prev) => prev.map((n) => (n.id === saved.id ? saved : n)));
   };
 
-  const deleteNotice = (id: string) => {
+  const deleteNotice = async (id: string) => {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.from('notices').delete().eq('id', id);
+
+    if (error) {
+      console.error('Failed to delete notice', error);
+      return;
+    }
+
     setNotices((prev) => prev.filter((n) => n.id !== id));
   };
 
