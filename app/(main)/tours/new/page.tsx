@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTours } from '@/context/ToursContext';
+import { useTours } from '../../../context/ToursContext';
 
 export default function NewTourPage() {
   const router = useRouter();

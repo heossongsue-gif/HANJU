@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useTours } from '@/context/ToursContext';
+import { useTours } from '../../../../context/ToursContext';
 
 export default function EditTourPage() {
   const router = useRouter();

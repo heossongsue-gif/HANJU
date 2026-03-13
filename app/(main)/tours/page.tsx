@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useTours } from '@/context/ToursContext';
+import { useTours } from '../../context/ToursContext';
 
 export default function ToursPage() {
   const { tours, deleteTour } = useTours();

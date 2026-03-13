@@ -1,5 +1,5 @@
-import Navbar from '@/components/Navbar';
-import { ToursProvider } from '@/context/ToursContext';
+import Navbar from '../components/Navbar';
+import { ToursProvider } from '../context/ToursContext';
 
 export default function MainLayout({
   children,
