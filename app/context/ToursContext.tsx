@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 
-// Define the type for a single tour
 interface Tour {
   id: number;
   name: string;
@@ -11,49 +11,118 @@ interface Tour {
   guide: string;
 }
 
-// Define the type for the context value
 interface ToursContextType {
   tours: Tour[];
-  addTour: (tour: Omit<Tour, 'id'>) => void;
-  deleteTour: (id: number) => void;
-  updateTour: (updatedTour: Tour) => void;
+  addTour: (tour: Omit<Tour, 'id'>) => Promise<void>;
+  deleteTour: (id: number) => Promise<void>;
+  updateTour: (updatedTour: Tour) => Promise<void>;
   getTourById: (id: number) => Tour | undefined;
 }
 
-// Create the context with a default value
 const ToursContext = createContext<ToursContextType | undefined>(undefined);
 
-// Define some initial data
-const initialTours: Tour[] = [
-  { id: 1, name: 'Jeju Island Adventure', startDate: '2026-04-10', endDate: '2026-04-15', guide: 'Kim' },
-  { id: 2, name: 'Seoul City Exploration', startDate: '2026-05-01', endDate: '2026-05-05', guide: 'Lee' },
-  { id: 3, name: 'Busan Beach Tour', startDate: '2026-06-12', endDate: '2026-06-16', guide: 'Park' },
-];
-
-// Create the provider component
 export function ToursProvider({ children }: { children: ReactNode }) {
-  const [tours, setTours] = useState<Tour[]>(initialTours);
+  const [tours, setTours] = useState<Tour[]>([]);
 
-  const addTour = (newTourData: Omit<Tour, 'id'>) => {
-    const newTour = {
-      ...newTourData,
-      id: tours.length > 0 ? Math.max(...tours.map(t => t.id)) + 1 : 1,
+  useEffect(() => {
+    const loadTours = async () => {
+      const { data, error } = await supabase
+        .from('tours')
+        .select('*')
+        .order('id', { ascending: true });
+
+      if (error) {
+        console.error('Failed to load tours from Supabase', error);
+        return;
+      }
+
+      const mapped =
+        data?.map((row: any) => ({
+          id: row.id,
+          name: row.name,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          guide: row.guide,
+        })) ?? [];
+
+      setTours(mapped);
     };
-    setTours(prevTours => [...prevTours, newTour]);
+
+    loadTours();
+  }, []);
+
+  const addTour = async (newTourData: Omit<Tour, 'id'>) => {
+    const { data, error } = await supabase
+      .from('tours')
+      .insert({
+        name: newTourData.name,
+        start_date: newTourData.startDate,
+        end_date: newTourData.endDate,
+        guide: newTourData.guide,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to add tour', error);
+      return;
+    }
+
+    const created: Tour = {
+      id: data.id,
+      name: data.name,
+      startDate: data.start_date,
+      endDate: data.end_date,
+      guide: data.guide,
+    };
+
+    setTours((prev) => [...prev, created]);
   };
 
-  const deleteTour = (id: number) => {
-    setTours(prevTours => prevTours.filter(tour => tour.id !== id));
+  const deleteTour = async (id: number) => {
+    const { error } = await supabase.from('tours').delete().eq('id', id);
+
+    if (error) {
+      console.error('Failed to delete tour', error);
+      return;
+    }
+
+    setTours((prev) => prev.filter((tour) => tour.id !== id));
   };
 
-  const updateTour = (updatedTour: Tour) => {
-    setTours(prevTours => 
-      prevTours.map(tour => (tour.id === updatedTour.id ? updatedTour : tour))
+  const updateTour = async (updatedTour: Tour) => {
+    const { data, error } = await supabase
+      .from('tours')
+      .update({
+        name: updatedTour.name,
+        start_date: updatedTour.startDate,
+        end_date: updatedTour.endDate,
+        guide: updatedTour.guide,
+      })
+      .eq('id', updatedTour.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to update tour', error);
+      return;
+    }
+
+    const saved: Tour = {
+      id: data.id,
+      name: data.name,
+      startDate: data.start_date,
+      endDate: data.end_date,
+      guide: data.guide,
+    };
+
+    setTours((prev) =>
+      prev.map((tour) => (tour.id === saved.id ? saved : tour)),
     );
   };
 
   const getTourById = (id: number) => {
-    return tours.find(tour => tour.id === id);
+    return tours.find((tour) => tour.id === id);
   };
 
   return (
@@ -63,7 +132,6 @@ export function ToursProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Create a custom hook for easy access to the context
 export function useTours() {
   const context = useContext(ToursContext);
   if (context === undefined) {
