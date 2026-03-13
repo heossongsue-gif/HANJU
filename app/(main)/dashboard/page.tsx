@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabase } from '../../../lib/supabaseClient';
+import { getSupabaseClient } from '../../../lib/supabaseClient';
 import { useSchedule } from '../../context/ScheduleContext';
 
 type Tab = 'schedule' | 'inquiries';
@@ -15,6 +15,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const loadUser = async () => {
+      const supabase = getSupabaseClient();
       const { data } = await supabase.auth.getUser();
       setUserEmail(data.user?.email ?? null);
     };

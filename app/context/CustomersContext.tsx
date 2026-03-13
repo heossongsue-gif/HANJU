@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { getSupabaseClient } from '../../lib/supabaseClient';
 
 interface Customer {
   id: number;
@@ -26,6 +26,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const loadCustomers = async () => {
+      const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -52,6 +53,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addCustomer = async (newCustomer: Omit<Customer, 'id'>) => {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('customers')
       .insert({
@@ -80,6 +82,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
   };
 
   const updateCustomer = async (updated: Customer) => {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('customers')
       .update({
@@ -111,6 +114,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteCustomer = async (id: number) => {
+    const supabase = getSupabaseClient();
     const { error } = await supabase.from('customers').delete().eq('id', id);
 
     if (error) {

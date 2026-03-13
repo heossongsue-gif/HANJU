@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { getSupabaseClient } from '../../lib/supabaseClient';
 
 export default function Navbar() {
   const router = useRouter();
@@ -12,6 +12,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const loadUser = async () => {
+      const supabase = getSupabaseClient();
       const { data } = await supabase.auth.getUser();
       const user = data.user;
       if (!user) {
@@ -30,6 +31,7 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
+    const supabase = getSupabaseClient();
     await supabase.auth.signOut();
     router.replace('/login');
   };

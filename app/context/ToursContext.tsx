@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { getSupabaseClient } from '../../lib/supabaseClient';
 
 interface Tour {
   id: number;
@@ -26,6 +26,7 @@ export function ToursProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const loadTours = async () => {
+      const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from('tours')
         .select('*')
@@ -52,6 +53,7 @@ export function ToursProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addTour = async (newTourData: Omit<Tour, 'id'>) => {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('tours')
       .insert({
@@ -80,6 +82,7 @@ export function ToursProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteTour = async (id: number) => {
+    const supabase = getSupabaseClient();
     const { error } = await supabase.from('tours').delete().eq('id', id);
 
     if (error) {
@@ -91,6 +94,7 @@ export function ToursProvider({ children }: { children: ReactNode }) {
   };
 
   const updateTour = async (updatedTour: Tour) => {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('tours')
       .update({

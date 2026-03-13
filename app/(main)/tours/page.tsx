@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useTours } from '../../context/ToursContext';
-import { supabase } from '../../../lib/supabaseClient';
+import { getSupabaseClient } from '../../../lib/supabaseClient';
 
 export default function ToursPage() {
   const { tours, deleteTour } = useTours();
@@ -11,6 +11,7 @@ export default function ToursPage() {
 
   useEffect(() => {
     const loadUser = async () => {
+      const supabase = getSupabaseClient();
       const { data } = await supabase.auth.getUser();
       setUserEmail(data.user?.email ?? null);
     };

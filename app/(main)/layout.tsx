@@ -7,7 +7,7 @@ import { ScheduleProvider } from '../context/ScheduleContext';
 import { NoticesProvider } from '../context/NoticesContext';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../lib/supabaseClient';
+import { getSupabaseClient } from '../../lib/supabaseClient';
 
 export default function MainLayout({
   children,
@@ -19,6 +19,7 @@ export default function MainLayout({
 
   useEffect(() => {
     const checkAuth = async () => {
+      const supabase = getSupabaseClient();
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         router.replace('/login');

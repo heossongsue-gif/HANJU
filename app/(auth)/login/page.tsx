@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../../lib/supabaseClient';
+import { getSupabaseClient } from '../../../lib/supabaseClient';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +14,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     const checkSession = async () => {
+      const supabase = getSupabaseClient();
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         router.replace('/dashboard');
@@ -27,6 +28,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
+    const supabase = getSupabaseClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
