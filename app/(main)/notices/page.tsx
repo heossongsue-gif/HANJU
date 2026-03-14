@@ -14,7 +14,7 @@ export default function NoticesPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [folder, setFolder] = useState<'전체' | '중요' | '기타'>('전체');
-  const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
+  const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadUser = async () => {
