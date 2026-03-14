@@ -8,13 +8,26 @@ export default function DashboardPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [stayDays, setStayDays] = useState<number | null>(null);
   const { getEventsByDate, addEvent, deleteEvent } = useSchedule();
 
   useEffect(() => {
     const loadUser = async () => {
       const supabase = getSupabaseClient();
       const { data } = await supabase.auth.getUser();
-      setUserEmail(data.user?.email ?? null);
+      const user = data.user;
+      setUserEmail(user?.email ?? null);
+      const meta = user?.user_metadata || {};
+      const rawStayDays = meta.stayDays as number | string | undefined;
+      const parsed =
+        typeof rawStayDays === 'number'
+          ? rawStayDays
+          : rawStayDays
+          ? Number(rawStayDays)
+          : null;
+      if (parsed && Number.isFinite(parsed) && parsed > 0) {
+        setStayDays(parsed);
+      }
     };
     void loadUser();
   }, []);
@@ -72,6 +85,14 @@ export default function DashboardPage() {
   };
 
   const today = new Date();
+  const todayMidnight = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  ).getTime();
+
+  const maxSelectableTime =
+    stayDays !== null ? todayMidnight + (stayDays - 1) * 24 * 60 * 60 * 1000 : null;
 
   const selectedDateKey =
     selectedDate &&
@@ -173,18 +194,30 @@ export default function DashboardPage() {
                     selectedDate.getMonth() === month &&
                     selectedDate.getDate() === day;
 
+                  const thisDateTime = new Date(year, month, day).getTime();
+                  const isInRange =
+                    maxSelectableTime === null
+                      ? true
+                      : thisDateTime >= todayMidnight &&
+                        thisDateTime <= maxSelectableTime;
+
                   return (
                     <button
                       key={di}
-                      onClick={() =>
-                        setSelectedDate(new Date(year, month, day))
-                      }
+                      onClick={() => {
+                        if (!isInRange) return;
+                        setSelectedDate(new Date(year, month, day));
+                      }}
                       className={`h-20 rounded-lg border text-[11px] md:text-xs flex flex-col items-start p-1.5 transition ${
                         isSelected
                           ? 'border-sky-500 bg-sky-50'
                           : isToday
                           ? 'border-sky-300 bg-sky-50'
                           : 'border-sky-50 hover:border-sky-200 hover:bg-sky-50'
+                      } ${
+                        !isInRange
+                          ? 'opacity-40 cursor-not-allowed hover:bg-white hover:border-sky-50'
+                          : ''
                       }`}
                       >
                       <span

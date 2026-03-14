@@ -10,6 +10,7 @@ export default function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [stayDays, setStayDays] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,12 @@ export default function SignupPage() {
       return;
     }
 
+    const daysNum = Number(stayDays);
+    if (!Number.isInteger(daysNum) || daysNum <= 0) {
+      setError('일정 기간은 1일 이상 숫자로 입력해주세요.');
+      return;
+    }
+
     setLoading(true);
 
     const supabase = getSupabaseClient();
@@ -42,6 +49,7 @@ export default function SignupPage() {
         data: {
           name,
           phone,
+          stayDays: daysNum,
         },
       },
     });
@@ -118,6 +126,25 @@ export default function SignupPage() {
               required
               placeholder="010-0000-0000"
             />
+          </div>
+          <div>
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="stayDays">
+              투어 기간 (며칠 동안)
+            </label>
+            <input
+              className="shadow-sm appearance-none border border-sky-100 rounded w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+              id="stayDays"
+              type="number"
+              min={1}
+              max={60}
+              value={stayDays}
+              onChange={(e) => setStayDays(e.target.value)}
+              required
+              placeholder="예: 3"
+            />
+            <p className="mt-1 text-[11px] text-gray-500">
+              예시) 3 을 입력하면 오늘부터 3일 동안의 일정만 달력에서 선택해서 볼 수 있습니다.
+            </p>
           </div>
           <div>
             <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
