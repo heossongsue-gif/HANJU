@@ -56,6 +56,46 @@ export default function ProfilePage() {
     setInfo('프로필이 저장되었습니다.');
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('정말 탈퇴하시겠습니까? 가입 정보와 고객 관리 목록에서 모두 삭제됩니다.')) {
+      return;
+    }
+
+    setError(null);
+    setInfo(null);
+
+    const supabase = getSupabaseClient();
+    const { data, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !data.user) {
+      setError('현재 로그인 정보를 확인할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    const currentEmail = data.user.email;
+
+    if (currentEmail) {
+      try {
+        await supabase.from('customers').delete().eq('email', currentEmail);
+      } catch (customerError) {
+        console.error('Failed to delete customer row on account deletion', customerError);
+      }
+    }
+
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+      });
+    } catch (updateError) {
+      console.error('Failed to mark user as deleted in metadata', updateError);
+    }
+
+    await supabase.auth.signOut();
+    router.replace('/signup');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -116,20 +156,29 @@ export default function ProfilePage() {
         {error && <p className="text-sm text-red-500">{error}</p>}
         {info && <p className="text-sm text-sky-600">{info}</p>}
 
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="flex flex-col gap-4 pt-2">
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 text-sm font-semibold rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+            >
+              뒤로가기
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-4 py-2 text-sm font-semibold rounded-md bg-sky-500 text-white hover:bg-sky-600 disabled:opacity-60"
+            >
+              {saving ? '저장 중...' : '프로필 저장'}
+            </button>
+          </div>
           <button
             type="button"
-            onClick={() => router.back()}
-            className="px-4 py-2 text-sm font-semibold rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+            onClick={handleDeleteAccount}
+            className="w-full text-sm font-semibold rounded-md border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 py-2"
           >
-            뒤로가기
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-4 py-2 text-sm font-semibold rounded-md bg-sky-500 text-white hover:bg-sky-600 disabled:opacity-60"
-          >
-            {saving ? '저장 중...' : '프로필 저장'}
+            가이드 계정 탈퇴하기
           </button>
         </div>
       </form>

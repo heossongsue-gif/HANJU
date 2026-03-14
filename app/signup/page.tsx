@@ -35,7 +35,7 @@ export default function SignupPage() {
     setLoading(true);
 
     const supabase = getSupabaseClient();
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -46,13 +46,26 @@ export default function SignupPage() {
       },
     });
 
-    setLoading(false);
-
     if (signUpError) {
+      setLoading(false);
       setError(`회원가입 오류: ${signUpError.message}`);
       return;
     }
 
+    try {
+      const signedUpEmail = data.user?.email ?? email;
+      await supabase.from('customers').insert({
+        name,
+        email: signedUpEmail,
+        phone,
+        tour: '가이드 회원',
+        memo: null,
+      });
+    } catch (customerError) {
+      console.error('Failed to save signup user into customers table', customerError);
+    }
+
+    setLoading(false);
     setInfo('회원가입이 완료되었습니다. 이메일을 확인하고 인증을 완료해주세요!');
   };
 
