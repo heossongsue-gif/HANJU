@@ -29,17 +29,27 @@ export default function CustomersPage() {
     if (selfSynced) return;
     if (!userEmail) return;
 
-    const alreadyExists = customers.some(
-      (c) => c.email && c.email.toLowerCase() === userEmail.toLowerCase(),
-    );
-
-    if (alreadyExists) {
-      setSelfSynced(true);
-      return;
-    }
-
     void (async () => {
+      const supabase = getSupabaseClient();
       try {
+        const { data, error } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('email', userEmail)
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Failed to check existing customer for current guide', error);
+          setSelfSynced(true);
+          return;
+        }
+
+        if (data) {
+          setSelfSynced(true);
+          return;
+        }
+
         await addCustomer({
           name: userName || userEmail,
           email: userEmail,
@@ -53,7 +63,7 @@ export default function CustomersPage() {
         setSelfSynced(true);
       }
     })();
-  }, [addCustomer, customers, selfSynced, userEmail, userName, userPhone]);
+  }, [addCustomer, selfSynced, userEmail, userName, userPhone]);
 
   const rawGuideEmails = process.env.NEXT_PUBLIC_GUIDE_EMAIL || '';
   const guideEmails = rawGuideEmails
