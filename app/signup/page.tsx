@@ -9,16 +9,23 @@ export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setInfo(null);
+
+    if (!agreePrivacy) {
+      setError('개인정보 수집·이용 동의가 필요합니다.');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('비밀번호가 서로 일치하지 않습니다.');
@@ -34,6 +41,7 @@ export default function SignupPage() {
       options: {
         data: {
           name,
+          phone,
         },
       },
     });
@@ -85,6 +93,20 @@ export default function SignupPage() {
             />
           </div>
           <div>
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="phone">
+              전화번호
+            </label>
+            <input
+              className="shadow-sm appearance-none border border-sky-100 rounded w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+              placeholder="010-0000-0000"
+            />
+          </div>
+          <div>
             <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
               비밀번호
             </label>
@@ -111,6 +133,32 @@ export default function SignupPage() {
               required
               placeholder="비밀번호를 다시 입력하세요"
             />
+          </div>
+          <div className="space-y-2 text-xs text-gray-600 border border-sky-100 rounded-lg p-3 bg-sky-50/40">
+            <div className="max-h-32 overflow-y-auto text-[11px] leading-relaxed">
+              <p className="font-semibold mb-1">[필수] 개인정보 수집·이용 동의</p>
+              <p>
+                한주 투어 가이드는 회원가입 및 서비스 제공을 위해 다음과 같은 개인정보를
+                수집·이용합니다.
+              </p>
+              <ul className="list-disc list-inside mt-1">
+                <li>수집 항목: 이름, 이메일, 비밀번호, 전화번호</li>
+                <li>이용 목적: 가이드 본인 확인, 계정 관리, 서비스 안내 및 고객 문의 대응</li>
+                <li>보유 기간: 회원 탈퇴 시까지 또는 관련 법령에서 정한 기간</li>
+              </ul>
+              <p className="mt-1">
+                위 개인정보 수집·이용에 동의하지 않으실 수 있으나, 이 경우 서비스 이용이 제한될 수 있습니다.
+              </p>
+            </div>
+            <label className="flex items-center gap-2 text-xs font-medium text-gray-700">
+              <input
+                type="checkbox"
+                className="w-4 h-4 rounded border-sky-300 text-sky-500 focus:ring-sky-400"
+                checked={agreePrivacy}
+                onChange={(e) => setAgreePrivacy(e.target.checked)}
+              />
+              <span>위 개인정보 수집·이용 방침을 읽고 동의합니다. (필수)</span>
+            </label>
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
           {info && <p className="text-sm text-sky-600">{info}</p>}

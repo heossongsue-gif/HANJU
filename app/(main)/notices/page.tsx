@@ -7,11 +7,13 @@ import { getSupabaseClient } from '../../../lib/supabaseClient';
 export default function NoticesPage() {
   const { notices, addNotice, deleteNotice } = useNotices();
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [folderFilter, setFolderFilter] = useState('전체');
+  const [folderFilter, setFolderFilter] = useState<'전체' | '중요' | '기타'>(
+    '전체',
+  );
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [folder, setFolder] = useState('전체');
+  const [folder, setFolder] = useState<'전체' | '중요' | '기타'>('전체');
 
   useEffect(() => {
     const loadUser = async () => {
@@ -62,20 +64,40 @@ export default function NoticesPage() {
             가이드가 올린 중요한 안내를 확인하세요.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs sm:text-sm text-gray-600">
-            분류
-            <select
-              value={folderFilter}
-              onChange={(e) => setFolderFilter(e.target.value)}
-              className="ml-2 text-xs border border-sky-100 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-sky-400 bg-white"
-            >
-              <option value="전체">전체</option>
-              <option value="중요">중요</option>
-              <option value="문의">문의 관련</option>
-              <option value="기타">기타</option>
-            </select>
-          </label>
+        <div className="inline-flex rounded-lg border border-sky-100 bg-white shadow-sm text-xs sm:text-sm">
+          <button
+            type="button"
+            onClick={() => setFolderFilter('전체')}
+            className={`px-3 py-1.5 rounded-l-lg font-medium ${
+              folderFilter === '전체'
+                ? 'bg-sky-500 text-white'
+                : 'text-gray-600 hover:bg-sky-50'
+            }`}
+          >
+            전체
+          </button>
+          <button
+            type="button"
+            onClick={() => setFolderFilter('중요')}
+            className={`px-3 py-1.5 font-medium ${
+              folderFilter === '중요'
+                ? 'bg-sky-500 text-white'
+                : 'text-gray-600 hover:bg-sky-50'
+            }`}
+          >
+            중요
+          </button>
+          <button
+            type="button"
+            onClick={() => setFolderFilter('기타')}
+            className={`px-3 py-1.5 rounded-r-lg font-medium ${
+              folderFilter === '기타'
+                ? 'bg-sky-500 text-white'
+                : 'text-gray-600 hover:bg-sky-50'
+            }`}
+          >
+            기타
+          </button>
         </div>
       </header>
 
@@ -147,12 +169,13 @@ export default function NoticesPage() {
             />
             <select
               value={folder}
-              onChange={(e) => setFolder(e.target.value)}
+              onChange={(e) =>
+                setFolder(e.target.value as '전체' | '중요' | '기타')
+              }
               className="w-full border border-sky-100 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 text-sm bg-white"
             >
               <option value="전체">전체</option>
               <option value="중요">중요</option>
-              <option value="문의">문의 관련</option>
               <option value="기타">기타</option>
             </select>
             <button

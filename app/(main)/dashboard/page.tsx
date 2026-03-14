@@ -4,11 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { getSupabaseClient } from '../../../lib/supabaseClient';
 import { useSchedule } from '../../context/ScheduleContext';
 
-type Tab = 'schedule' | 'inquiries';
-
 export default function DashboardPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeTab, setActiveTab] = useState<Tab>('schedule');
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const { getEventsByDate, addEvent, deleteEvent } = useSchedule();
@@ -114,30 +111,8 @@ export default function DashboardPage() {
             가이드 일정 관리
           </h1>
           <p className="text-gray-500 text-xs md:text-sm mt-1">
-            이 달의 투어 일정과 문의를 한 눈에 확인하세요.
+            이 달의 투어 일정을 한 눈에 확인하세요.
           </p>
-        </div>
-        <div className="inline-flex rounded-lg border border-sky-100 bg-white shadow-sm">
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
-              activeTab === 'schedule'
-                ? 'bg-sky-500 text-white'
-                : 'text-gray-600 hover:bg-sky-50'
-            }`}
-          >
-            일정
-          </button>
-          <button
-            onClick={() => setActiveTab('inquiries')}
-            className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
-              activeTab === 'inquiries'
-                ? 'bg-sky-500 text-white'
-                : 'text-gray-600 hover:bg-sky-50'
-            }`}
-          >
-            문의
-          </button>
         </div>
       </header>
 
@@ -227,10 +202,9 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Right side panel depending on tab */}
+        {/* Right side panel */}
         <section className="bg-white rounded-2xl shadow-md border border-sky-100 p-4 md:p-6">
-          {activeTab === 'schedule' && (
-            <div className="space-y-4">
+          <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-800">
                   {selectedDateKey
@@ -338,25 +312,7 @@ export default function DashboardPage() {
                   일정 세부 정보를 보거나 추가하려면 달력에서 날짜를 먼저 선택하세요.
                 </p>
               )}
-            </div>
-          )}
-
-          {activeTab === 'inquiries' && (
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">최근 문의</h2>
-              <p className="text-sm text-gray-500">
-                홈페이지나 메시지로 들어온 문의를 정리해서 관리하는 영역입니다. (추후 DB 연동)
-              </p>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="p-2 rounded-lg bg-sky-50 border border-sky-100">
-                  예시) 6월 부산 투어 가족 4명 예약 문의
-                </li>
-                <li className="p-2 rounded-lg bg-sky-50 border border-sky-100">
-                  예시) 단체 20명 견적 요청 – 서울 시티 투어
-                </li>
-              </ul>
-            </div>
-          )}
+          </div>
         </section>
       </div>
     </div>

@@ -1,0 +1,12 @@
+{
+  "name": "한주 투어 가이드",
+  "short_name": "한주 가이드",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#e0f2fe",
+  "theme_color": "#0ea5e9",
+  "description": "한주 투어 가이드를 위한 일정 및 고객 관리 앱",
+  "lang": "ko-KR",
+  "icons": []
+}
+
