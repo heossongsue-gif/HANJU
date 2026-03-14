@@ -13,10 +13,20 @@ export default function NewCustomerPage() {
   const [phone, setPhone] = useState('');
   const [tour, setTour] = useState('');
   const [memo, setMemo] = useState('');
+  const [stayStartDate, setStayStartDate] = useState('');
+  const [stayEndDate, setStayEndDate] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addCustomer({ name, email, phone, tour, memo: memo.trim() || null });
+    await addCustomer({
+      name,
+      email,
+      phone,
+      tour,
+      memo: memo.trim() || null,
+      stayStartDate: stayStartDate || null,
+      stayEndDate: stayEndDate || null,
+    } as any);
     router.push('/customers');
   };
 
@@ -62,6 +72,33 @@ export default function NewCustomerPage() {
             onChange={(e) => setPhone(e.target.value)}
             required
           />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="stayStartDate">
+              투어 시작일
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+              id="stayStartDate"
+              type="date"
+              value={stayStartDate}
+              onChange={(e) => setStayStartDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="stayEndDate">
+              투어 종료일
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+              id="stayEndDate"
+              type="date"
+              min={stayStartDate || undefined}
+              value={stayEndDate}
+              onChange={(e) => setStayEndDate(e.target.value)}
+            />
+          </div>
         </div>
         <div>
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="tour">

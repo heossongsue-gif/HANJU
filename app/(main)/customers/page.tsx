@@ -56,7 +56,9 @@ export default function CustomersPage() {
           phone: userPhone || '',
           tour: '가이드 회원',
           memo: null,
-        });
+          stayStartDate: (meta.stayStartDate as string | undefined) ?? null,
+          stayEndDate: (meta.stayEndDate as string | undefined) ?? null,
+        } as any);
       } catch (err) {
         console.error('Failed to auto-sync signed-up guide into customers table', err);
       } finally {
@@ -116,6 +118,9 @@ export default function CustomersPage() {
               <th className="px-2 sm:px-3 py-2 text-left w-24 sm:w-28">
                 전화번호
               </th>
+              <th className="px-2 sm:px-3 py-2 text-left w-32 sm:w-40">
+                투어 기간
+              </th>
               <th className="px-2 sm:px-3 py-2 text-left w-40 sm:w-56">
                 기본 정보
               </th>
@@ -132,6 +137,11 @@ export default function CustomersPage() {
                 <td className="px-2 sm:px-3 py-2 break-all">{customer.email}</td>
                 <td className="px-2 sm:px-3 py-2 whitespace-nowrap">
                   {customer.phone}
+                </td>
+                <td className="px-2 sm:px-3 py-2 whitespace-nowrap">
+                  {customer.stayStartDate && customer.stayEndDate
+                    ? `${customer.stayStartDate} ~ ${customer.stayEndDate}`
+                    : '-'}
                 </td>
                 <td className="px-2 sm:px-3 py-2 break-words">
                   {customer.tour}

@@ -10,6 +10,8 @@ interface Customer {
   phone: string;
   tour: string;
   memo: string | null;
+  stayStartDate: string | null;
+  stayEndDate: string | null;
 }
 
 interface CustomersContextType {
@@ -46,6 +48,8 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
           phone: row.phone,
           tour: row.tour,
           memo: row.memo ?? null,
+          stayStartDate: row.stay_start_date ?? null,
+          stayEndDate: row.stay_end_date ?? null,
         })) ?? [];
 
       setCustomers(mapped);
@@ -64,6 +68,8 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
         phone: newCustomer.phone,
         tour: newCustomer.tour,
         memo: newCustomer.memo ?? null,
+        stay_start_date: newCustomer.stayStartDate ?? null,
+        stay_end_date: newCustomer.stayEndDate ?? null,
       })
       .select()
       .single();
@@ -80,6 +86,8 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
       phone: data.phone,
       tour: data.tour,
       memo: data.memo ?? null,
+      stayStartDate: data.stay_start_date ?? null,
+      stayEndDate: data.stay_end_date ?? null,
     };
 
     setCustomers((prev) => [...prev, created]);
@@ -95,6 +103,8 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
         phone: updated.phone,
         tour: updated.tour,
         memo: updated.memo ?? null,
+        stay_start_date: updated.stayStartDate ?? null,
+        stay_end_date: updated.stayEndDate ?? null,
       })
       .eq('id', updated.id)
       .select()
@@ -112,6 +122,8 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
       phone: data.phone,
       tour: data.tour,
       memo: data.memo ?? null,
+      stayStartDate: data.stay_start_date ?? null,
+      stayEndDate: data.stay_end_date ?? null,
     };
 
     setCustomers((prev) =>
