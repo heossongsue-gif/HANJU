@@ -8,7 +8,8 @@ export default function DashboardPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [stayDays, setStayDays] = useState<number | null>(null);
+  const [stayStartDate, setStayStartDate] = useState<string | null>(null);
+  const [stayEndDate, setStayEndDate] = useState<string | null>(null);
   const { getEventsByDate, addEvent, deleteEvent } = useSchedule();
 
   useEffect(() => {
@@ -18,15 +19,11 @@ export default function DashboardPage() {
       const user = data.user;
       setUserEmail(user?.email ?? null);
       const meta = user?.user_metadata || {};
-      const rawStayDays = meta.stayDays as number | string | undefined;
-      const parsed =
-        typeof rawStayDays === 'number'
-          ? rawStayDays
-          : rawStayDays
-          ? Number(rawStayDays)
-          : null;
-      if (parsed && Number.isFinite(parsed) && parsed > 0) {
-        setStayDays(parsed);
+      const start = meta.stayStartDate as string | undefined;
+      const end = meta.stayEndDate as string | undefined;
+      if (start && end) {
+        setStayStartDate(start);
+        setStayEndDate(end);
       }
     };
     void loadUser();
@@ -85,14 +82,15 @@ export default function DashboardPage() {
   };
 
   const today = new Date();
-  const todayMidnight = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  ).getTime();
 
-  const maxSelectableTime =
-    stayDays !== null ? todayMidnight + (stayDays - 1) * 24 * 60 * 60 * 1000 : null;
+  const stayStartTime =
+    stayStartDate != null
+      ? new Date(`${stayStartDate}T00:00:00`).getTime()
+      : null;
+  const stayEndTime =
+    stayEndDate != null
+      ? new Date(`${stayEndDate}T23:59:59`).getTime()
+      : null;
 
   const selectedDateKey =
     selectedDate &&
@@ -194,12 +192,16 @@ export default function DashboardPage() {
                     selectedDate.getMonth() === month &&
                     selectedDate.getDate() === day;
 
-                  const thisDateTime = new Date(year, month, day).getTime();
+                  const thisDateTime = new Date(
+                    year,
+                    month,
+                    day,
+                  ).getTime();
                   const isInRange =
-                    maxSelectableTime === null
+                    stayStartTime === null || stayEndTime === null
                       ? true
-                      : thisDateTime >= todayMidnight &&
-                        thisDateTime <= maxSelectableTime;
+                      : thisDateTime >= stayStartTime &&
+                        thisDateTime <= stayEndTime;
 
                   return (
                     <button

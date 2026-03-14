@@ -10,7 +10,8 @@ export default function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [stayDays, setStayDays] = useState('');
+  const [stayStartDate, setStayStartDate] = useState('');
+  const [stayEndDate, setStayEndDate] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -33,9 +34,13 @@ export default function SignupPage() {
       return;
     }
 
-    const daysNum = Number(stayDays);
-    if (!Number.isInteger(daysNum) || daysNum <= 0) {
-      setError('일정 기간은 1일 이상 숫자로 입력해주세요.');
+    if (!stayStartDate || !stayEndDate) {
+      setError('투어 시작일과 종료일을 모두 선택해주세요.');
+      return;
+    }
+
+    if (stayStartDate > stayEndDate) {
+      setError('투어 시작일이 종료일보다 늦을 수 없습니다.');
       return;
     }
 
@@ -49,7 +54,8 @@ export default function SignupPage() {
         data: {
           name,
           phone,
-          stayDays: daysNum,
+          stayStartDate,
+          stayEndDate,
         },
       },
     });
@@ -127,23 +133,36 @@ export default function SignupPage() {
               placeholder="010-0000-0000"
             />
           </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="stayDays">
-              투어 기간 (며칠 동안)
-            </label>
-            <input
-              className="shadow-sm appearance-none border border-sky-100 rounded w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
-              id="stayDays"
-              type="number"
-              min={1}
-              max={60}
-              value={stayDays}
-              onChange={(e) => setStayDays(e.target.value)}
-              required
-              placeholder="예: 3"
-            />
-            <p className="mt-1 text-[11px] text-gray-500">
-              예시) 3 을 입력하면 오늘부터 3일 동안의 일정만 달력에서 선택해서 볼 수 있습니다.
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="stayStart">
+                투어 시작일
+              </label>
+              <input
+                className="shadow-sm appearance-none border border-sky-100 rounded w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+                id="stayStart"
+                type="date"
+                value={stayStartDate}
+                onChange={(e) => setStayStartDate(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="stayEnd">
+                투어 종료일
+              </label>
+              <input
+                className="shadow-sm appearance-none border border-sky-100 rounded w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+                id="stayEnd"
+                type="date"
+                value={stayEndDate}
+                min={stayStartDate || undefined}
+                onChange={(e) => setStayEndDate(e.target.value)}
+                required
+              />
+            </div>
+            <p className="sm:col-span-2 mt-1 text-[11px] text-gray-500">
+              달력에서 투어 시작일과 종료일을 선택하면, 그 기간에 해당하는 일정만 메인 화면에서 선택할 수 있습니다.
             </p>
           </div>
           <div>

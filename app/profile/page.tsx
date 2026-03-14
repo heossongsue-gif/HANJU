@@ -74,22 +74,28 @@ export default function ProfilePage() {
 
     const currentEmail = data.user.email;
 
-    if (currentEmail) {
-      try {
-        await supabase.from('customers').delete().eq('email', currentEmail);
-      } catch (customerError) {
-        console.error('Failed to delete customer row on account deletion', customerError);
-      }
-    }
-
     try {
-      await supabase.auth.updateUser({
-        data: {
-          deletedAt: new Date().toISOString(),
+      const res = await fetch('/api/delete-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          userId: data.user.id,
+          email: currentEmail,
+        }),
       });
-    } catch (updateError) {
-      console.error('Failed to mark user as deleted in metadata', updateError);
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        console.error('Failed to delete account via API', payload);
+        setError('계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        return;
+      }
+    } catch (apiError) {
+      console.error('Unexpected error while calling delete-account API', apiError);
+      setError('계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      return;
     }
 
     await supabase.auth.signOut();
