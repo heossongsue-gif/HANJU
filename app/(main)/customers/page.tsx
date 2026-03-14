@@ -50,6 +50,10 @@ export default function CustomersPage() {
           return;
         }
 
+        const { data: userData } = await supabase.auth.getUser();
+        const user = userData.user;
+        const meta = user?.user_metadata || {};
+
         await addCustomer({
           name: userName || userEmail,
           email: userEmail,
