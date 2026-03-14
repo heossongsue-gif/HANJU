@@ -74,6 +74,8 @@ export default function SignupPage() {
         phone,
         tour: '가이드 회원',
         memo: null,
+        stay_start_date: stayStartDate,
+        stay_end_date: stayEndDate,
       });
     } catch (customerError) {
       console.error('Failed to save signup user into customers table', customerError);
