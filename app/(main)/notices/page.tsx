@@ -14,6 +14,7 @@ export default function NoticesPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [folder, setFolder] = useState<'전체' | '중요' | '기타'>('전체');
+  const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -52,6 +53,11 @@ export default function NoticesPage() {
     folderFilter === '전체'
       ? notices
       : notices.filter((n) => n.folder === folderFilter);
+
+  const selectedNotice =
+    selectedNoticeId === null
+      ? null
+      : notices.find((n) => n.id === selectedNoticeId) ?? null;
 
   return (
     <div className="space-y-4">
@@ -114,7 +120,8 @@ export default function NoticesPage() {
             .map((notice) => (
               <article
                 key={notice.id}
-                className="p-3 rounded-lg bg-sky-50 border border-sky-100"
+                className="p-3 rounded-lg bg-sky-50 border border-sky-100 cursor-pointer hover:bg-sky-100 transition"
+                onClick={() => setSelectedNoticeId(notice.id)}
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <span className="text-[11px] sm:text-xs px-2 py-0.5 rounded-full bg-white border border-sky-100 text-sky-600 whitespace-nowrap">
@@ -122,7 +129,10 @@ export default function NoticesPage() {
                   </span>
                   {isGuide && (
                     <button
-                      onClick={() => deleteNotice(notice.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNotice(notice.id);
+                      }}
                       className="text-[10px] sm:text-[11px] text-red-500 hover:underline"
                     >
                       삭제
@@ -143,6 +153,45 @@ export default function NoticesPage() {
               </article>
             ))}
         </div>
+
+        {selectedNotice && (
+          <div
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4"
+            onClick={() => setSelectedNoticeId(null)}
+          >
+            <div
+              className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-sky-100 p-4 space-y-3 max-h-[80vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-sky-50 border border-sky-100 text-[11px] text-sky-700">
+                    {selectedNotice.folder}
+                  </span>
+                  <h2 className="mt-2 text-base sm:text-lg font-semibold text-gray-900 break-words">
+                    {selectedNotice.title}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  className="ml-2 text-gray-400 hover:text-gray-600"
+                  aria-label="닫기"
+                  onClick={() => setSelectedNoticeId(null)}
+                >
+                  ✕
+                </button>
+              </div>
+              {selectedNotice.content && (
+                <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-line break-words">
+                  {selectedNotice.content}
+                </p>
+              )}
+              <p className="text-[11px] text-gray-400">
+                {new Date(selectedNotice.createdAt).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        )}
 
         {isGuide ? (
           <form
