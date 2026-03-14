@@ -57,7 +57,7 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm('정말 탈퇴하시겠습니까? 가입 정보와 고객 관리 목록에서 모두 삭제됩니다.')) {
+    if (!window.confirm('정말 탈퇴하시겠습니까?')) {
       return;
     }
 
@@ -178,7 +178,7 @@ export default function ProfilePage() {
             onClick={handleDeleteAccount}
             className="w-full text-sm font-semibold rounded-md border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 py-2"
           >
-            가이드 계정 탈퇴하기
+            탈퇴하기
           </button>
         </div>
       </form>

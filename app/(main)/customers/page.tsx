@@ -6,17 +6,54 @@ import { useCustomers } from '../../context/CustomersContext';
 import { getSupabaseClient } from '../../../lib/supabaseClient';
 
 export default function CustomersPage() {
-  const { customers, deleteCustomer } = useCustomers();
+  const { customers, addCustomer, deleteCustomer } = useCustomers();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userPhone, setUserPhone] = useState<string | null>(null);
+  const [selfSynced, setSelfSynced] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
       const supabase = getSupabaseClient();
       const { data } = await supabase.auth.getUser();
-      setUserEmail(data.user?.email ?? null);
+      const user = data.user;
+      setUserEmail(user?.email ?? null);
+      const meta = user?.user_metadata || {};
+      setUserName((meta.name as string | undefined) || user?.email || null);
+      setUserPhone((meta.phone as string | undefined) || null);
     };
     void loadUser();
   }, []);
+
+  useEffect(() => {
+    if (selfSynced) return;
+    if (!userEmail) return;
+
+    const alreadyExists = customers.some(
+      (c) => c.email && c.email.toLowerCase() === userEmail.toLowerCase(),
+    );
+
+    if (alreadyExists) {
+      setSelfSynced(true);
+      return;
+    }
+
+    void (async () => {
+      try {
+        await addCustomer({
+          name: userName || userEmail,
+          email: userEmail,
+          phone: userPhone || '',
+          tour: '가이드 회원',
+          memo: null,
+        });
+      } catch (err) {
+        console.error('Failed to auto-sync signed-up guide into customers table', err);
+      } finally {
+        setSelfSynced(true);
+      }
+    })();
+  }, [addCustomer, customers, selfSynced, userEmail, userName, userPhone]);
 
   const rawGuideEmails = process.env.NEXT_PUBLIC_GUIDE_EMAIL || '';
   const guideEmails = rawGuideEmails
