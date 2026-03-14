@@ -11,6 +11,7 @@ export default function CustomersPage() {
   const [userName, setUserName] = useState<string | null>(null);
   const [userPhone, setUserPhone] = useState<string | null>(null);
   const [selfSynced, setSelfSynced] = useState(false);
+  const [activeFolder, setActiveFolder] = useState<'전체' | string>('전체');
 
   useEffect(() => {
     const loadUser = async () => {
@@ -62,6 +63,7 @@ export default function CustomersPage() {
           memo: null,
           stayStartDate: (meta.stayStartDate as string | undefined) ?? null,
           stayEndDate: (meta.stayEndDate as string | undefined) ?? null,
+          folder: '가이드',
         } as any);
       } catch (err) {
         console.error('Failed to auto-sync signed-up guide into customers table', err);
@@ -101,16 +103,63 @@ export default function CustomersPage() {
     }
   };
 
+  const folders = Array.from(
+    new Set(
+      customers
+        .map((c) => c.folder)
+        .filter((v): v is string => v !== null && v.trim().length > 0),
+    ),
+  );
+
+  const visibleCustomers =
+    activeFolder === '전체'
+      ? customers
+      : customers.filter((c) => c.folder === activeFolder);
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold">고객 관리</h1>
-        <Link
-          href="/customers/new"
-          className="inline-flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded text-sm"
-        >
-          + 새 고객 추가
-        </Link>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">고객 관리</h1>
+          <p className="mt-1 text-[11px] text-gray-500">
+            폴더/분류를 사용해서 고객을 그룹별로 정리할 수 있습니다.
+          </p>
+        </div>
+        <div className="flex flex-col items-start gap-2 sm:items-end">
+          <div className="inline-flex flex-wrap gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveFolder('전체')}
+              className={`px-2.5 py-1 rounded-full text-[11px] border ${
+                activeFolder === '전체'
+                  ? 'bg-sky-500 text-white border-sky-500'
+                  : 'bg-white text-gray-700 border-sky-100 hover:bg-sky-50'
+              }`}
+            >
+              전체
+            </button>
+            {folders.map((folder) => (
+              <button
+                key={folder}
+                type="button"
+                onClick={() => setActiveFolder(folder)}
+                className={`px-2.5 py-1 rounded-full text-[11px] border ${
+                  activeFolder === folder
+                    ? 'bg-sky-500 text-white border-sky-500'
+                    : 'bg-white text-gray-700 border-sky-100 hover:bg-sky-50'
+                }`}
+              >
+                {folder}
+              </button>
+            ))}
+          </div>
+          <Link
+            href="/customers/new"
+            className="inline-flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded text-sm"
+          >
+            + 새 고객 추가
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white shadow-md rounded-2xl border border-sky-100 p-3 sm:p-4 overflow-x-auto">
@@ -121,6 +170,9 @@ export default function CustomersPage() {
               <th className="px-2 sm:px-3 py-2 text-left w-32 sm:w-40">이메일</th>
               <th className="px-2 sm:px-3 py-2 text-left w-24 sm:w-28">
                 전화번호
+              </th>
+              <th className="px-2 sm:px-3 py-2 text-left w-24 sm:w-28">
+                폴더
               </th>
               <th className="px-2 sm:px-3 py-2 text-left w-32 sm:w-40">
                 투어 기간
@@ -135,12 +187,15 @@ export default function CustomersPage() {
             </tr>
           </thead>
           <tbody>
-            {customers.map((customer) => (
+            {visibleCustomers.map((customer) => (
               <tr key={customer.id} className="border-b align-top">
                 <td className="px-2 sm:px-3 py-2 break-words">{customer.name}</td>
                 <td className="px-2 sm:px-3 py-2 break-all">{customer.email}</td>
                 <td className="px-2 sm:px-3 py-2 whitespace-nowrap">
                   {customer.phone}
+                </td>
+                <td className="px-2 sm:px-3 py-2 whitespace-nowrap">
+                  {customer.folder || '-'}
                 </td>
                 <td className="px-2 sm:px-3 py-2 whitespace-nowrap">
                   {customer.stayStartDate && customer.stayEndDate

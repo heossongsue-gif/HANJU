@@ -12,6 +12,7 @@ interface Customer {
   memo: string | null;
   stayStartDate: string | null;
   stayEndDate: string | null;
+  folder: string | null;
 }
 
 interface CustomersContextType {
@@ -50,6 +51,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
           memo: row.memo ?? null,
           stayStartDate: row.stay_start_date ?? null,
           stayEndDate: row.stay_end_date ?? null,
+          folder: row.folder ?? null,
         })) ?? [];
 
       setCustomers(mapped);
@@ -70,6 +72,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
         memo: newCustomer.memo ?? null,
         stay_start_date: newCustomer.stayStartDate ?? null,
         stay_end_date: newCustomer.stayEndDate ?? null,
+        folder: newCustomer.folder ?? null,
       })
       .select()
       .single();
@@ -88,6 +91,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
       memo: data.memo ?? null,
       stayStartDate: data.stay_start_date ?? null,
       stayEndDate: data.stay_end_date ?? null,
+      folder: data.folder ?? null,
     };
 
     setCustomers((prev) => [...prev, created]);
@@ -105,6 +109,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
         memo: updated.memo ?? null,
         stay_start_date: updated.stayStartDate ?? null,
         stay_end_date: updated.stayEndDate ?? null,
+        folder: updated.folder ?? null,
       })
       .eq('id', updated.id)
       .select()
@@ -124,6 +129,7 @@ export function CustomersProvider({ children }: { children: ReactNode }) {
       memo: data.memo ?? null,
       stayStartDate: data.stay_start_date ?? null,
       stayEndDate: data.stay_end_date ?? null,
+      folder: data.folder ?? null,
     };
 
     setCustomers((prev) =>

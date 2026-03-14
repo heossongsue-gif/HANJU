@@ -16,6 +16,7 @@ export default function EditCustomerPage() {
   const [memo, setMemo] = useState('');
   const [stayStartDate, setStayStartDate] = useState('');
   const [stayEndDate, setStayEndDate] = useState('');
+  const [folder, setFolder] = useState('');
 
   useEffect(() => {
     if (!params?.id) return;
@@ -34,6 +35,7 @@ export default function EditCustomerPage() {
     setMemo(customer.memo ?? '');
     setStayStartDate(customer.stayStartDate ?? '');
     setStayEndDate(customer.stayEndDate ?? '');
+    setFolder(customer.folder ?? '');
   }, [params, getCustomerById, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,6 +52,7 @@ export default function EditCustomerPage() {
       memo: memo.trim() || null,
       stayStartDate: stayStartDate || null,
       stayEndDate: stayEndDate || null,
+      folder: folder.trim() || null,
     } as any);
 
     router.push('/customers');
@@ -136,6 +139,19 @@ export default function EditCustomerPage() {
             value={tour}
             onChange={(e) => setTour(e.target.value)}
             placeholder="예: 6월 제주 3박4일, 1조 배정"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="folder">
+            폴더 / 분류
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+            id="folder"
+            type="text"
+            value={folder}
+            onChange={(e) => setFolder(e.target.value)}
+            placeholder="예: 1조, 가족, VIP, 3월 제주"
           />
         </div>
         <div>

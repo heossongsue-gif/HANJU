@@ -15,6 +15,7 @@ export default function NewCustomerPage() {
   const [memo, setMemo] = useState('');
   const [stayStartDate, setStayStartDate] = useState('');
   const [stayEndDate, setStayEndDate] = useState('');
+  const [folder, setFolder] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +27,7 @@ export default function NewCustomerPage() {
       memo: memo.trim() || null,
       stayStartDate: stayStartDate || null,
       stayEndDate: stayEndDate || null,
+      folder: folder.trim() || null,
     } as any);
     router.push('/customers');
   };
@@ -99,6 +101,22 @@ export default function NewCustomerPage() {
               onChange={(e) => setStayEndDate(e.target.value)}
             />
           </div>
+        </div>
+        <div>
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="folder">
+            폴더 / 분류
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+            id="folder"
+            type="text"
+            value={folder}
+            onChange={(e) => setFolder(e.target.value)}
+            placeholder="예: 1조, 가족, VIP, 3월 제주"
+          />
+          <p className="mt-1 text-[11px] text-gray-500">
+            가이드가 자유롭게 입력해서 폴더처럼 분류할 수 있는 이름입니다.
+          </p>
         </div>
         <div>
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="tour">
